@@ -3,20 +3,18 @@ from typing import Callable
 
 #custom modules
 import date_string as Date
+from database_interface import DbInterface
+
+#TODO: fill in info once db is setup
+DB_CONNECTION_INFO = {
+    "host":"localhost",
+    "user":"",
+    "passwd":"",
+    "database":""
+}
 
 
-class DbInterface:
-    def getFunction(functionName : str) -> Callable | None:
-        '''
-        returns DbInterface function if present, else returns None
-        '''
-        classFunction: callable | None = getattr(DbInterface, functionName, None)
-        if (callable(classFunction)):
-            return classFunction
-        return None
-
-
-def getCommandLineInput() -> list[str]:
+def getConsoleInput() -> list[str]:
     '''
     returns command line input without filename
     '''
@@ -25,13 +23,14 @@ def getCommandLineInput() -> list[str]:
 
 def main():
     # input format:[function arg1 arg2 ...]
-    input: list[str] = getCommandLineInput()
+    CONSOLE_INPUT: list[str] = getConsoleInput()
 
-    command: Callable | None = DbInterface.getFunction(input[0])
+    DB_INTERFACE = DbInterface(*DB_CONNECTION_INFO)
+    command: Callable | None = DB_INTERFACE.getFunction(CONSOLE_INPUT[0])
     if (command == None):
-        raise ValueError(f'DbInterface has no function {input[0]}')
+        raise ValueError(f'DbInterface has no function {CONSOLE_INPUT[0]}')
     
-    command(*input[1:])
+    command(*CONSOLE_INPUT[1:])
 
 if __name__ == '__main__':
     main()
