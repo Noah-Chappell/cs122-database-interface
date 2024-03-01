@@ -2,15 +2,14 @@ import sys
 from typing import Callable
 
 #custom modules
-import date_string as Date
 from database_interface import DbInterface
 
 #TODO: fill in info once db is setup
 DB_CONNECTION_INFO = {
-    "host":"localhost",
-    "user":"",
-    "passwd":"",
-    "database":""
+    'host':'localhost',
+    'user':'root',
+    'password':'root',
+    'databaseName':'ics-server-database'
 }
 
 
@@ -30,7 +29,7 @@ def main():
     if (command == None):
         raise ValueError(f'DbInterface has no function {CONSOLE_INPUT[0]}')
     
-    command(*CONSOLE_INPUT[1:])
+    DB_INTERFACE.command(*CONSOLE_INPUT[1:])
 
 if __name__ == '__main__':
     main()
