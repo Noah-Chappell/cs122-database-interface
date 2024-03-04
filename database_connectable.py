@@ -25,6 +25,7 @@ class Connectable:
                 raise err
             
         self.dbConnection: SqlConnection = dbConnection
+        self.databaseName: str = databaseName
 
     def __connectToDatabase(host: str, user: str, password: str, databaseName: str) -> SqlConnection:
         '''
