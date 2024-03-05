@@ -1,11 +1,13 @@
 from typing import Callable, Iterable
 import os
 import csv
+import mysql.connector
 
 #custom modules
 import date_string as Date
 import database_connectable as DbConnectable
 import csv_dbinitialization
+import safe_query
 
 
 class DbInterface(DbConnectable.Connectable):
@@ -142,9 +144,36 @@ class DbInterface(DbConnectable.Connectable):
     
 
     #TODO: finish all assignment functions and add project requirements as comments
+    def db_insertStudent(self, UCINetID: str, email: str, First: str, Middle: str, Last: str) -> None:
+        insertQueries = [
+            safe_query.SafeQuery(
+                f"INSERT INTO Users
+                    VALUES ('{UCINetID}', '{First}', '{Middle}', '{Last}');", 
+                f"DELETE FROM Users
+                    WHERE UCINetID = '{UCINetID}';"),
+            safe_query.SafeQuery(
+                f"INSERT INTO UserEmail
+                    VALUES ('{UCINetID}', '{email}');", 
+                f"DELETE FROM UserEmail
+                    WHERE UCINetID = '{UCINetID}';"),
+            safe_query.SafeQuery(
+                f"INSERT INTO Student
+                    VALUES('{UCINetID}');", 
+                f"DELETE FROM students
+                    WHERE UCINetID = '{UCINetID}';")
+        ]
+        try:
+            safe_query.SafeQuery.executeMultiple(insertQueries)
+        except mysql.connector.errors.ProgrammingError: #abstract this
+            self.__outputBool(False)
+            return
+
+        self.__outputBool(True)
+    
     def db_addEmail(self, UCINetID: str, email: str, commit=True) -> None:
         #__outputBool()
         pass
+        
     def db_deleteStudent(self, UCINetID: str, email: str, commit=True) -> None:
         #__outputBool()
         pass

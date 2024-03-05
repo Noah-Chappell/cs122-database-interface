@@ -4,7 +4,7 @@ from typing import Callable
 #custom modules
 from database_interface import DbInterface
 
-#TODO: fill in info once db is setup
+#TODO: don't use fstring, sql injection attack? womp womp
 DB_CONNECTION_INFO = {
     'host':'localhost',
     'user':'root',
