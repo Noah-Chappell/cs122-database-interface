@@ -55,23 +55,39 @@ class DbInterface(DbConnectable.Connectable):
         return(insertRow)
     
 
-    def initializeTable(self, tableName: str) -> None:
-        tableInitCommand: str = csv_dbinitialization.TABLE_INIT_MAP[tableName]
-        self.dbCursor.execute(tableInitCommand)
-        self.dbConnetion.commit()
 
     
     def csvToTable(self, filePath: str) -> None:
-        tableName: str = os.path.split(filePath)[1][:-4]
-        self.initializeTable(tableName)
+        tableAlias: str = os.path.split(filePath)[1][:-4]
 
         with open(filePath, mode='r') as csvFile:
             tableData = csv.reader(csvFile)
             for row in tableData:
                 self.dbCursor.execute(
-                    f'INSERT INTO {tableName}\
+                    f'INSERT INTO {csv_dbinitialization.ALIAS_TABLE_MAP[tableAlias].tableName}\
                         VALUES {DbInterface.csvinput_normalized(row)};'
                 )
+            self.dbConnetion.commit()
+
+    def drop_tables(self) -> None:
+        for alias in reversed(csv_dbinitialization.TABLE_CREATE_ORDER):
+            self.dbCursor.execute(f'DROP TABLE IF EXISTS \
+                        {csv_dbinitialization.ALIAS_TABLE_MAP[alias].tableName};')
+        self.dbConnetion.commit()
+
+    def initializeTables(self) -> None:
+        for alias in csv_dbinitialization.TABLE_CREATE_ORDER:
+            self.dbCursor.execute(\
+                csv_dbinitialization.ALIAS_TABLE_MAP[alias].initCommand)
+            self.dbConnetion.commit()
+    
+    def fill_tables(self, folderPath: str) -> None:
+        presentFiles = os.listdir(folderPath)
+        for alias in csv_dbinitialization.TABLE_CREATE_ORDER:
+            workingFile = alias + '.csv'
+            if (workingFile not in presentFiles):
+                raise ValueError(f"could not find {workingFile} in {folderPath}")
+            self.csvToTable(os.path.join(folderPath, workingFile))
             self.dbConnetion.commit()
 
     def db_tableSize(self, tableName: str) -> int:
@@ -80,19 +96,17 @@ class DbInterface(DbConnectable.Connectable):
         return self.dbCursor[0]
 
 
-    def db_test(self, there) -> None:
-        print(f"hello :) {there}")
-
-    def db_import(self, folderName: str) -> None:
-        for file in os.listdir(folderName):
-            if (os.path.isfile(file) and os.path.splitext(file)[1] == '.csv'):
-                self.csvToTable(file)
+    def db_import(self, folderPath: str) -> None:
+        self.drop_tables()
+        self.initializeTables()
+        self.fill_tables(folderPath)
+                
         
-        numUsers = self.db_tableSize('Users')
-        numMachines = self.db_tableSize('Machines')
-        numCourses = self.db_tableSize('Courses')
+        # numUsers = self.db_tableSize('Users')
+        # numMachines = self.db_tableSize('Machines')
+        # numCourses = self.db_tableSize('Courses')
         
-        DbInterface.outputTable([numUsers, numMachines, numCourses])
+        # DbInterface.__outputTable([numUsers, numMachines, numCourses])
     
 
     #TODO: finish all assignment functions and add project requirements as comments
