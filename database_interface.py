@@ -33,6 +33,7 @@ class DbInterface(DbConnectable.Connectable):
         for row in rawTable:
             outputRow = str(row)[1:-1]
             outputRow.replace("'NULL'", "NULL")
+            print(outputRow)
 
 
     def getFunction(self, functionName : str) -> Callable | None:
@@ -92,8 +93,7 @@ class DbInterface(DbConnectable.Connectable):
 
     def db_tableSize(self, tableName: str) -> int:
         self.dbCursor.execute(f'SELECT COUNT(*) AS count FROM {tableName}')
-        self.dbConnetion.commit()
-        return self.dbCursor[0]
+        return self.dbCursor.fetchone()[0]
 
 
     def db_import(self, folderPath: str) -> None:
@@ -102,11 +102,11 @@ class DbInterface(DbConnectable.Connectable):
         self.fill_tables(folderPath)
                 
         
-        # numUsers = self.db_tableSize('Users')
-        # numMachines = self.db_tableSize('Machines')
-        # numCourses = self.db_tableSize('Courses')
+        numUsers = self.db_tableSize('Users')
+        numMachines = self.db_tableSize('Machines')
+        numCourses = self.db_tableSize('Courses')
         
-        # DbInterface.__outputTable([numUsers, numMachines, numCourses])
+        DbInterface.__outputTable([[numUsers, numMachines, numCourses]])
     
 
     #TODO: finish all assignment functions and add project requirements as comments
