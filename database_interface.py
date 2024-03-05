@@ -85,7 +85,7 @@ class DbInterface(DbConnectable.Connectable):
 
     def db_import(self, folderName: str) -> None:
         for file in os.listdir(folderName):
-            if (os.isfile(file) and os.path.splitext(file)[1] == '.csv'):
+            if (os.path.isfile(file) and os.path.splitext(file)[1] == '.csv'):
                 self.csvToTable(file)
         
         numUsers = self.db_tableSize('Users')
