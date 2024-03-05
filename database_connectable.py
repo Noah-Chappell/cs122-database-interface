@@ -2,6 +2,7 @@ from typing import Type
 import mysql.connector
 
 SqlConnection = Type[mysql.connector.connection_cext.CMySQLConnection]
+SqlCursor = Type[mysql.connector.cursor_cext.CMySQLCursor]
 
 DATABASE_NOT_FOUND: int = 1049
 
@@ -10,6 +11,7 @@ class Connectable:
         #connects to SQL database and stores in instance variable, if database 
         #doesnt exist, it will be created
         dbConnection: SqlConnection | None = None
+        dbCursor: SqlCursor | None = None
         try:
             dbConnection = Connectable.__connectToDatabase(host, user, password, databaseName)
 
@@ -17,14 +19,16 @@ class Connectable:
             if (err.errno == DATABASE_NOT_FOUND):
 
                 dbConnection = Connectable.__connectToServer(host, user, password)
-                dbConnection.execute(f'CREATE DATABASE {databaseName}')
+                dbCursor = dbConnection.cursor()
+                dbCursor.execute(f"CREATE DATABASE `{databaseName}`")
                 dbConnection.commit()
 
                 dbConnection = Connectable.__connectToDatabase(host, user, password, databaseName)
             else:
                 raise err
             
-        self.dbConnection: SqlConnection = dbConnection
+        self.dbCursor: SqlCursor = dbConnection.cursor()
+        self.dbConnetion: SqlConnection = dbConnection
         self.databaseName: str = databaseName
 
     def __connectToDatabase(host: str, user: str, password: str, databaseName: str) -> SqlConnection:

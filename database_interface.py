@@ -57,8 +57,8 @@ class DbInterface(DbConnectable.Connectable):
 
     def initializeTable(self, tableName: str) -> None:
         tableInitCommand: str = csv_dbinitialization.TABLE_INIT_MAP[tableName]
-        self.dbConnection.execute(tableInitCommand)
-        self.dbConnection.commit()
+        self.dbCursor.execute(tableInitCommand)
+        self.dbConnetion.commit()
 
     
     def csvToTable(self, filePath: str) -> None:
@@ -68,16 +68,20 @@ class DbInterface(DbConnectable.Connectable):
         with open(filePath, mode='r') as csvFile:
             tableData = csv.reader(csvFile)
             for row in tableData:
-                self.dbConnection.execute(
+                self.dbCursor.execute(
                     f'INSERT INTO {tableName}\
                         VALUES {DbInterface.csvinput_normalized(row)};'
                 )
-            self.dbConnection.commit()
+            self.dbConnetion.commit()
 
     def db_tableSize(self, tableName: str) -> int:
-        self.dbConnection.execute(f'SELECT COUNT(*) AS count FROM {tableName}')
-        self.dbConnection.commit()
-        return self.dbConnection[0]
+        self.dbCursor.execute(f'SELECT COUNT(*) AS count FROM {tableName}')
+        self.dbConnetion.commit()
+        return self.dbCursor[0]
+
+
+    def db_test(self, there) -> None:
+        print(f"hello :) {there}")
 
     def db_import(self, folderName: str) -> None:
         for file in os.listdir(folderName):
@@ -107,19 +111,19 @@ class DbInterface(DbConnectable.Connectable):
     def db_updateCourse(self, UCINetID: str, email: str, commit=True) -> None:
         #__outputBool()
         pass
-    def db_listCourse(self, UCINetID: str, email: str, commit=True) -> None:
+    def db_listCourse(self, UCINetID: str, email: str) -> None:
         #__outputTable()
         pass
-    def db_popularCourse(self, UCINetID: str, email: str, commit=True) -> None:
+    def db_popularCourse(self, UCINetID: str, email: str) -> None:
         #__outputTable()
         pass
-    def db_adminEmails(self, UCINetID: str, email: str, commit=True) -> None:
+    def db_adminEmails(self, UCINetID: str, email: str) -> None:
         #__outputTable()
         pass
-    def db_activeStudent(self, UCINetID: str, email: str, commit=True) -> None:
+    def db_activeStudent(self, UCINetID: str, email: str) -> None:
         #__outputTable()
         pass
-    def db_machineUsage(self, UCINetID: str, email: str, commit=True) -> None:
+    def db_machineUsage(self, UCINetID: str, email: str) -> None:
         #__outputTable()
         pass
     

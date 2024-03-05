@@ -24,12 +24,14 @@ def main():
     # input format:[function arg1 arg2 ...]
     CONSOLE_INPUT: list[str] = getConsoleInput()
 
-    DB_INTERFACE = DbInterface(*DB_CONNECTION_INFO)
+    DB_INTERFACE = DbInterface(**DB_CONNECTION_INFO)
+    print("---connection established---")
     command: Callable | None = DB_INTERFACE.getFunction(CONSOLE_INPUT[0])
     if (command == None):
         raise ValueError(f'DbInterface has no function {CONSOLE_INPUT[0]}')
-    
-    DB_INTERFACE.command(*CONSOLE_INPUT[1:])
+    print("---calling---")
+    command(DB_INTERFACE, *CONSOLE_INPUT[1:])
+    print("---finished---")
 
 if __name__ == '__main__':
     main()
