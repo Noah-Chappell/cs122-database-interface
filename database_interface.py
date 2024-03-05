@@ -51,6 +51,9 @@ class DbInterface(DbConnectable.Connectable):
 
 
     def csvinput_normalized(rawCsvRow: str) -> csv:
+        '''
+        takes a SQL response row and converts it to printable output
+        '''
         insertRow = '(' + str(rawCsvRow)[1:-1] + ')'
         insertRow.replace("'NULL'", "NULL")
         return(insertRow)
@@ -59,6 +62,10 @@ class DbInterface(DbConnectable.Connectable):
 
     
     def csvToTable(self, filePath: str) -> None:
+        '''
+        takes a filepath and converts the csv file at that path to a table
+        in the instances connected database
+        '''
         tableAlias: str = os.path.split(filePath)[1][:-4]
 
         with open(filePath, mode='r') as csvFile:
@@ -71,18 +78,30 @@ class DbInterface(DbConnectable.Connectable):
             self.dbConnetion.commit()
 
     def drop_tables(self) -> None:
+        '''
+        deletes all project schema's tables from the instances connected 
+        database
+        '''
         for alias in reversed(csv_dbinitialization.TABLE_CREATE_ORDER):
             self.dbCursor.execute(f'DROP TABLE IF EXISTS \
                         {csv_dbinitialization.ALIAS_TABLE_MAP[alias].tableName};')
         self.dbConnetion.commit()
 
     def initializeTables(self) -> None:
+        '''
+        creates all the tables in the project schema in the instances connected
+        database
+        '''
         for alias in csv_dbinitialization.TABLE_CREATE_ORDER:
             self.dbCursor.execute(\
                 csv_dbinitialization.ALIAS_TABLE_MAP[alias].initCommand)
             self.dbConnetion.commit()
     
     def fill_tables(self, folderPath: str) -> None:
+        '''
+        given a path to a folder containing csv data for project schema tables,
+        fills schema tables with data from corresponding files
+        '''
         presentFiles = os.listdir(folderPath)
         for alias in csv_dbinitialization.TABLE_CREATE_ORDER:
             workingFile = alias + '.csv'
@@ -92,11 +111,24 @@ class DbInterface(DbConnectable.Connectable):
             self.dbConnetion.commit()
 
     def db_tableSize(self, tableName: str) -> int:
+        '''
+        gives a table name returns the size of that table
+        '''
         self.dbCursor.execute(f'SELECT COUNT(*) AS count FROM {tableName}')
         return self.dbCursor.fetchone()[0]
 
+# ~~~~~~~~~~~~~~~~~~~~~~~~~PROJECT REQUIRED FUNCTIONS ~~~~~~~~~~~~~~~~~~~~~~~~~
 
     def db_import(self, folderPath: str) -> None:
+        #project required
+        '''
+        Delete existing tables, and create new tables. Then read the csv files 
+        in the given folder and import data into database. You can assume that 
+        the folder always contains all the necessary CSV files and the files are 
+        correct.
+
+        Table - Number of users,Number of machine, Number of Course
+        '''
         self.drop_tables()
         self.initializeTables()
         self.fill_tables(folderPath)

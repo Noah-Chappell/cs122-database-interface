@@ -3,6 +3,7 @@ class TableInitData:
         self.tableName = tableName
         self.initCommand = initCommand
 
+# first -> last = 0 -> N - 1
 TABLE_CREATE_ORDER = ['users', 'emails', 'students', 'admins', 'courses', 'projects', 'machines', 'use', 'manage']
 
 ALIAS_TABLE_MAP = {
