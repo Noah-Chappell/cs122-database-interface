@@ -3,6 +3,7 @@ class TableInitData:
         self.tableName = tableName
         self.initCommand = initCommand
 
+#order that db tables must be initialized to prevent foreign key issues
 # first -> last = 0 -> N - 1
 TABLE_CREATE_ORDER = ['users', 'emails', 'students', 'admins', 'courses', 'projects', 'machines', 'use', 'manage']
 

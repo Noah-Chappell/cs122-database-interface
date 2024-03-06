@@ -8,6 +8,11 @@ SqlCursor = Type[mysql.connector.cursor_cext.CMySQLCursor]
 DATABASE_NOT_FOUND: int = 1049
 
 class Connectable:
+    '''
+    class that connects with database and stores a connection and cursor
+    to that database, if no database of passed name is found, an empty 
+    database of that name will be created
+    '''
     def __init__(self, host: str, user: str, password: str, databaseName: str) -> None:
         #connects to SQL database and stores in instance variable, if database 
         #doesnt exist, it will be created

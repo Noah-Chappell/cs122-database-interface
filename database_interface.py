@@ -13,7 +13,8 @@ import safe_query as SafeQuerying
 class DbInterface(DbConnectable.Connectable):
     '''
     interface to communicate with SQL database via callable functions
-    if passed database given does not exist it will be created empty
+    if passed database does not exist, an empty database of that name
+    will be created
     '''
     #all functions are prefixed with db to avoid naming collisions, so db_ is
     #added to function calls

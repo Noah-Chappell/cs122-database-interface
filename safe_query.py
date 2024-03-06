@@ -8,6 +8,10 @@ class SafeQuery:
         self.doQuery = query
         self.undoQuery = reverseQuery
     def executeMultiple(queryList: list, cursor: SqlCursor) -> bool:
+        '''
+        executes a list of SafeQuerys, if a query fails, all the executed
+        queries undo queries will attempt to be called
+        '''
         complete = 0
         try:
             for safeQuery in queryList:
