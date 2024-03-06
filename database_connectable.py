@@ -1,6 +1,7 @@
 from typing import Type
 import mysql.connector
 
+SqlErrorModuleName = 'mysql.connector.errors'
 SqlConnection = Type[mysql.connector.connection_cext.CMySQLConnection]
 SqlCursor = Type[mysql.connector.cursor_cext.CMySQLCursor]
 

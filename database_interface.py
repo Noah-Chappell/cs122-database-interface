@@ -1,13 +1,13 @@
 from typing import Callable, Iterable
 import os
 import csv
-import mysql.connector
 
 #custom modules
 import date_string as Date
 import database_connectable as DbConnectable
 import csv_dbinitialization
-import safe_query
+import safe_query as SafeQuerying
+
 
 
 class DbInterface(DbConnectable.Connectable):
@@ -118,6 +118,7 @@ class DbInterface(DbConnectable.Connectable):
         '''
         self.dbCursor.execute(f'SELECT COUNT(*) AS count FROM {tableName}')
         return self.dbCursor.fetchone()[0]
+    
 
 # ~~~~~~~~~~~~~~~~~~~~~~~~~PROJECT REQUIRED FUNCTIONS ~~~~~~~~~~~~~~~~~~~~~~~~~
 
@@ -143,63 +144,95 @@ class DbInterface(DbConnectable.Connectable):
         DbInterface.__outputTable([[numUsers, numMachines, numCourses]])
     
 
+    def executeMultipleQueryCommand(self, safeQueryList: list, commit: bool) -> bool:
+        try:
+            SafeQuerying.SafeQuery.executeMultiple(safeQueryList, self.dbCursor)
+            if (commit):
+                self.dbConnetion.commit()
+        except Exception as err:
+            if (err.__class__.__module__ == DbConnectable.SqlErrorModuleName):
+                # print(err)
+                return False
+            else:
+                raise err
+        return True
+    
+    def executeSingleQueryCommand(self, query: str, commit: bool) -> bool:
+        try:
+            self.dbCursor.execute(query)
+            if (commit):
+                self.dbConnetion.commit()
+        except Exception as err:
+            if (err.__class__.__module__ == DbConnectable.SqlErrorModuleName):
+                # print(err)
+                return False
+            else:
+                raise err
+        return True
+
+
     #TODO: finish all assignment functions and add project requirements as comments
-    def db_insertStudent(self, UCINetID: str, email: str, First: str, Middle: str, Last: str) -> None:
+    def db_insertStudent(self, UCINetID: str, email: str, First: str, Middle: str, Last: str, commit=True) -> None:
+        '''
+        Insert a new student into the related tables.
+
+        Bool
+        '''
         insertQueries = [
-            safe_query.SafeQuery(
-                f"INSERT INTO Users
+            SafeQuerying.SafeQuery(
+                f"INSERT INTO Users\
                     VALUES ('{UCINetID}', '{First}', '{Middle}', '{Last}');", 
-                f"DELETE FROM Users
+                f"DELETE FROM Users\
                     WHERE UCINetID = '{UCINetID}';"),
-            safe_query.SafeQuery(
-                f"INSERT INTO UserEmail
+            SafeQuerying.SafeQuery(
+                f"INSERT INTO UserEmail\
                     VALUES ('{UCINetID}', '{email}');", 
-                f"DELETE FROM UserEmail
+                f"DELETE FROM UserEmail\
                     WHERE UCINetID = '{UCINetID}';"),
-            safe_query.SafeQuery(
-                f"INSERT INTO Student
+            SafeQuerying.SafeQuery(
+                f"INSERT INTO Students\
                     VALUES('{UCINetID}');", 
-                f"DELETE FROM students
+                f"DELETE FROM students\
                     WHERE UCINetID = '{UCINetID}';")
         ]
-        try:
-            safe_query.SafeQuery.executeMultiple(insertQueries)
-        except mysql.connector.errors.ProgrammingError: #abstract this
-            self.__outputBool(False)
-            return
-
-        self.__outputBool(True)
+        querySuccess = self.executeMultipleQueryCommand(insertQueries, commit)
+        DbInterface.__outputBool(querySuccess)
     
     def db_addEmail(self, UCINetID: str, email: str, commit=True) -> None:
-        #__outputBool()
-        pass
+        '''
+        Add email to a user
+        '''
+        query = f"INSERT INTO UserEmail\
+                    VALUES('{UCINetID}', '{email}')"
+        querySuccess = self.executeSingleQueryCommand(query, commit)
+        DbInterface.__outputBool(querySuccess)
         
     def db_deleteStudent(self, UCINetID: str, email: str, commit=True) -> None:
-        #__outputBool()
+        #DBInterface.__outputBool()
         pass
     def db_insertMachine(self, UCINetID: str, email: str, commit=True) -> None:
-        #__outputBool()
+        #DBInterface.__outputBool()
         pass
     def db_insertUse(self, UCINetID: str, email: str, commit=True) -> None:
-        #__outputBool()
+        #DBInterface.__outputBool()
         pass
     def db_updateCourse(self, UCINetID: str, email: str, commit=True) -> None:
-        #__outputBool()
+        #DBInterface.__outputBool()
         pass
     def db_listCourse(self, UCINetID: str, email: str) -> None:
-        #__outputTable()
+        #DBInterface.__outputTable()
         pass
     def db_popularCourse(self, UCINetID: str, email: str) -> None:
-        #__outputTable()
+        #DBInterface.__outputTable()
         pass
     def db_adminEmails(self, UCINetID: str, email: str) -> None:
-        #__outputTable()
+        #DBInterface.__outputTable()
         pass
     def db_activeStudent(self, UCINetID: str, email: str) -> None:
-        #__outputTable()
+        #DBInterface.__outputTable()
         pass
     def db_machineUsage(self, UCINetID: str, email: str) -> None:
-        #__outputTable()
+        #DBInterface.__outputTable()
         pass
     
     
