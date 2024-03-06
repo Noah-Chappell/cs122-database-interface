@@ -120,10 +120,44 @@ class DbInterface(DbConnectable.Connectable):
         return self.dbCursor.fetchone()[0]
     
 
+    def executeMultipleQueryCommand(self, safeQueryList: list, commit: bool) -> bool:
+        '''
+        facilitates the execution of multiple safeQuerys and returns whether
+        that query succeded or failed, passed queries must
+        be of SageQuerying.SafeQuery
+        '''
+        try:
+            SafeQuerying.SafeQuery.executeMultiple(safeQueryList, self.dbCursor)
+            if (commit):
+                self.dbConnetion.commit()
+        except Exception as err:
+            if (err.__class__.__module__ == DbConnectable.SqlErrorModuleName):
+                # print(err)
+                return False
+            else:
+                raise err
+        return True
+    
+    def executeSingleQueryCommand(self, query: str, commit: bool) -> bool:
+        '''
+        facilitates the execution of a single passed query and returns whether
+        that query succeded or failed
+        '''
+        try:
+            self.dbCursor.execute(query)
+            if (commit):
+                self.dbConnetion.commit()
+        except Exception as err:
+            if (err.__class__.__module__ == DbConnectable.SqlErrorModuleName):
+                # print(err)
+                return False
+            else:
+                raise err
+        return True
+
 # ~~~~~~~~~~~~~~~~~~~~~~~~~PROJECT REQUIRED FUNCTIONS ~~~~~~~~~~~~~~~~~~~~~~~~~
 
     def db_import(self, folderPath: str) -> None:
-        #project required
         '''
         Delete existing tables, and create new tables. Then read the csv files 
         in the given folder and import data into database. You can assume that 
@@ -142,36 +176,7 @@ class DbInterface(DbConnectable.Connectable):
         numCourses = self.db_tableSize('Courses')
         
         DbInterface.__outputTable([[numUsers, numMachines, numCourses]])
-    
 
-    def executeMultipleQueryCommand(self, safeQueryList: list, commit: bool) -> bool:
-        try:
-            SafeQuerying.SafeQuery.executeMultiple(safeQueryList, self.dbCursor)
-            if (commit):
-                self.dbConnetion.commit()
-        except Exception as err:
-            if (err.__class__.__module__ == DbConnectable.SqlErrorModuleName):
-                # print(err)
-                return False
-            else:
-                raise err
-        return True
-    
-    def executeSingleQueryCommand(self, query: str, commit: bool) -> bool:
-        try:
-            self.dbCursor.execute(query)
-            if (commit):
-                self.dbConnetion.commit()
-        except Exception as err:
-            if (err.__class__.__module__ == DbConnectable.SqlErrorModuleName):
-                # print(err)
-                return False
-            else:
-                raise err
-        return True
-
-
-    #TODO: finish all assignment functions and add project requirements as comments
     def db_insertStudent(self, UCINetID: str, email: str, First: str, Middle: str, Last: str, commit=True) -> None:
         '''
         Insert a new student into the related tables.
@@ -201,12 +206,16 @@ class DbInterface(DbConnectable.Connectable):
     def db_addEmail(self, UCINetID: str, email: str, commit=True) -> None:
         '''
         Add email to a user
+
+        Bool
         '''
         query = f"INSERT INTO UserEmail\
                     VALUES('{UCINetID}', '{email}')"
         querySuccess = self.executeSingleQueryCommand(query, commit)
         DbInterface.__outputBool(querySuccess)
-        
+    
+
+    #TODO: finish all assignment functions and add project requirements as comments
     def db_deleteStudent(self, UCINetID: str, email: str, commit=True) -> None:
         #DBInterface.__outputBool()
         pass
