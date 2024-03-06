@@ -121,7 +121,7 @@ class DbInterface(DbConnectable.Connectable):
         return self.dbCursor.fetchone()[0]
     
 
-    def executeMultipleQueryCommand(self, safeQueryList: list, commit: bool) -> bool:
+    def executeMultipleQueryCommand(self, safeQueryList: list, commit: bool, debug=False) -> bool:
         '''
         facilitates the execution of multiple safeQuerys and returns whether
         that query succeded or failed, passed queries must
@@ -133,13 +133,14 @@ class DbInterface(DbConnectable.Connectable):
                 self.dbConnetion.commit()
         except Exception as err:
             if (err.__class__.__module__ == DbConnectable.SqlErrorModuleName):
-                # print(err)
+                if (debug):
+                    print(err)
                 return False
             else:
                 raise err
         return True
     
-    def executeSingleQueryCommand(self, query: str, commit: bool) -> bool:
+    def executeSingleQueryCommand(self, query: str, commit: bool, debug=False) -> bool:
         '''
         facilitates the execution of a single passed query and returns whether
         that query succeded or failed
@@ -150,7 +151,8 @@ class DbInterface(DbConnectable.Connectable):
                 self.dbConnetion.commit()
         except Exception as err:
             if (err.__class__.__module__ == DbConnectable.SqlErrorModuleName):
-                # print(err)
+                if (debug):
+                    print(err)
                 return False
             else:
                 raise err
