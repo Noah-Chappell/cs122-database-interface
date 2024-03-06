@@ -164,7 +164,9 @@ class DbInterface(DbConnectable.Connectable):
         the folder always contains all the necessary CSV files and the files are 
         correct.
 
-        Table - Number of users,Number of machine, Number of Course
+        in -> python3 project.py import [folderName:str]
+
+        out -> Table - Number of users,Number of machine, Number of Course
         '''
         self.drop_tables()
         self.initializeTables()
@@ -181,7 +183,8 @@ class DbInterface(DbConnectable.Connectable):
         '''
         Insert a new student into the related tables.
 
-        Bool
+        in -> python3 project.py insertStudent [UCINetID:str] [email:str] [First:str] [Middle:str] [Last:str]
+        out -> Bool
         '''
         insertQueries = [
             SafeQuerying.SafeQuery(
@@ -207,7 +210,8 @@ class DbInterface(DbConnectable.Connectable):
         '''
         Add email to a user
 
-        Bool
+        in -> python3 project.py addEmail[UCINetID:str] [email:str]
+        out -> Bool
         '''
         query = f"INSERT INTO UserEmail\
                     VALUES('{UCINetID}', '{email}')"
@@ -215,19 +219,58 @@ class DbInterface(DbConnectable.Connectable):
         DbInterface.__outputBool(querySuccess)
     
 
+
+    def db_deleteStudent(self, UCINetID: str, commit=True) -> None:
+        '''
+        Delete the student in both the User and Student table.
+
+        in -> python3 project.py deleteStudent [UCINetID:str]
+        out -> Bool
+        '''
+        query = f"DELETE FROM Users\
+                    WHERE UCINetID = '{UCINetID}'"
+        querySuccess = self.executeSingleQueryCommand(query, commit)
+        DbInterface.__outputBool(querySuccess)
+
+    def db_insertMachine(self, MachineID: str, hostname: str, IPAddr:str, status: str, location: str, commit=True) -> None:
+        '''
+        Insert a new machine.
+
+        in -> python3 project.py insertMachine [MachineID:int] [hostname:str] [IPAddr:str] [status:str] [location:str]
+        out -> Bool
+        '''
+        query = f"INSERT INTO Machines\
+                    VALUES ({MachineID}, '{hostname}', '{IPAddr}', '{status}', '{location}')"
+        querySuccess = self.executeSingleQueryCommand(query, commit)
+        DbInterface.__outputBool(querySuccess)
+
+    def db_insertUse(self, ProjId: str, UCINetID: str, MachineID: str, start: str, end: str, commit=True) -> None:
+        '''
+        Insert a new use record.
+
+        in -> python3 project.py insertUse [ProjId:int] [UCINetID:str] [MachineID:int] [start:date] [end:date]
+        out -> Bool
+        '''
+        query = f"INSERT INTO StudentUseMachinesInProject\
+                    VALUES ({ProjId}, '{UCINetID}', {MachineID}, '{start}', '{end}')"
+        querySuccess = self.executeSingleQueryCommand(query, commit)
+        DbInterface.__outputBool(querySuccess)
+    
+    def db_updateCourse(self, CourseId: str, title: str, commit=True) -> None:
+        '''
+        Update the title of a course
+
+        in -> python3 project.py updateCourse [CourseId:int] [title:str]
+        out -> Bool
+        '''
+        query = f"UPDATE Courses\
+                    SET Title = '{title}'\
+                    WHERE CourseID = {CourseId}"
+        querySuccess = self.executeSingleQueryCommand(query, commit)
+        DbInterface.__outputBool(querySuccess)
+
+    
     #TODO: finish all assignment functions and add project requirements as comments
-    def db_deleteStudent(self, UCINetID: str, email: str, commit=True) -> None:
-        #DBInterface.__outputBool()
-        pass
-    def db_insertMachine(self, UCINetID: str, email: str, commit=True) -> None:
-        #DBInterface.__outputBool()
-        pass
-    def db_insertUse(self, UCINetID: str, email: str, commit=True) -> None:
-        #DBInterface.__outputBool()
-        pass
-    def db_updateCourse(self, UCINetID: str, email: str, commit=True) -> None:
-        #DBInterface.__outputBool()
-        pass
     def db_listCourse(self, UCINetID: str, email: str) -> None:
         #DBInterface.__outputTable()
         pass
