@@ -22,6 +22,20 @@ class DbInterface(DbConnectable.Connectable):
     def __init__(self, host: str, user: str, password: str, databaseName: str) -> None:
         super().__init__(host, user, password, databaseName)
     
+    def getFunction(self, functionName : str) -> Callable | None:
+        '''
+        returns DbInterface function if present, else returns None
+        '''
+        classFunction: callable | None = getattr(
+            DbInterface, 
+            DbInterface.COMMAND_PREFIX + functionName, None
+            )
+        if (callable(classFunction)):
+            return classFunction
+        return None
+
+
+
     def __outputBool(boolValue: bool) -> None:
         '''
         prints output of SQL command assuming the value is a bool
@@ -38,19 +52,6 @@ class DbInterface(DbConnectable.Connectable):
             print(outputRow)
 
 
-    def getFunction(self, functionName : str) -> Callable | None:
-        '''
-        returns DbInterface function if present, else returns None
-        '''
-        classFunction: callable | None = getattr(
-            DbInterface, 
-            DbInterface.COMMAND_PREFIX + functionName, None
-            )
-        if (callable(classFunction)):
-            return classFunction
-        return None
-    
-
 
     def csvinput_normalized(rawCsvRow: str) -> csv:
         '''
@@ -61,8 +62,6 @@ class DbInterface(DbConnectable.Connectable):
         return(insertRow)
     
 
-
-    
     def csvToTable(self, filePath: str) -> None:
         '''
         takes a filepath and converts the csv file at that path to a table
@@ -78,6 +77,7 @@ class DbInterface(DbConnectable.Connectable):
                         VALUES {DbInterface.csvinput_normalized(row)};'
                 )
             self.dbConnetion.commit()
+
 
     def drop_tables(self) -> None:
         '''
@@ -218,8 +218,6 @@ class DbInterface(DbConnectable.Connectable):
         querySuccess = self.executeSingleQueryCommand(query, commit)
         DbInterface.__outputBool(querySuccess)
     
-
-
     def db_deleteStudent(self, UCINetID: str, commit=True) -> None:
         '''
         Delete the student in both the User and Student table.
