@@ -272,7 +272,7 @@ class DbInterface(DbConnectable.Connectable):
 
     
     #TODO: finish all assignment functions and add project requirements as comments
-    def db_listCourse(self, UCINetID: str, email: str) -> None:
+    def db_listCourse(self, UCINetID: str) -> None:
         #DBInterface.__outputTable()
         pass
     def db_popularCourse(self, UCINetID: str, email: str) -> None:
@@ -288,4 +288,12 @@ class DbInterface(DbConnectable.Connectable):
         #DBInterface.__outputTable()
         pass
     
-    
+
+
+
+
+
+# /\___/\
+#(  _ _  )
+#  = Y =
+#_.__..._/..___
