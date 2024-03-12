@@ -48,7 +48,7 @@ class DbInterface(DbConnectable.Connectable):
         prints output of SQL command assuming the value is a table
         '''
         for row in rawTable:
-            outputRow = str(row)[1:-1]
+            outputRow = str(row).strip("[](),")
             outputRow.replace("'NULL'", "NULL")
             print(outputRow)
 
@@ -270,22 +270,67 @@ class DbInterface(DbConnectable.Connectable):
         querySuccess = self.executeSingleQueryCommand(query, commit)
         DbInterface.__outputBool(querySuccess)
 
-    
-    #TODO: finish all assignment functions and add project requirements as comments
     def db_listCourse(self, UCINetID: str) -> None:
-        #DBInterface.__outputTable()
-        pass
-    def db_popularCourse(self, UCINetID: str, email: str) -> None:
-        #DBInterface.__outputTable()
-        pass
-    def db_adminEmails(self, UCINetID: str, email: str) -> None:
-        #DBInterface.__outputTable()
-        pass
+        '''
+        Given a student ID, list all unique courses the student attended. Ordered by courseId ascending.
+
+        in -> python3 project.py listCourse [UCINetID:str]
+        out -> Table - CourseId,title,quarter
+        '''
+        query = f"SELECT DISTINCT C.CourseID, Title, Quarter FROM Courses C\
+                    JOIN Projects P ON C.CourseID = P.CourseID\
+                    JOIN StudentUseMachinesInProject SU ON P.ProjectID = SU.ProjectID\
+                    WHERE StudentUCINetID = '{UCINetID}'\
+                    ORDER BY C.CourseID ASC"
+        querySuccess = self.executeSingleQueryCommand(query, commit=False)
+        if querySuccess:
+            rows = self.dbCursor.fetchall()
+            DbInterface.__outputTable(rows)
+
+    def db_popularCourse(self, N: int) -> None:
+        '''
+        List the top N course that has the most students attended. Ordered by studentCount, courseID descending.
+
+        in -> python3 project.py popularCourse [N: int]
+        out -> Table - CourseId,title,studentCount
+        '''
+        query = f"SELECT C.CourseID, Title, COUNT(StudentUCINetID) AS NumStudents FROM Courses C\
+                    JOIN Projects P ON C.CourseID = P.CourseID\
+                    JOIN StudentUseMachinesInProject SU ON P.ProjectID = SU.ProjectID\
+                    GROUP BY C.CourseID\
+                    ORDER BY NumStudents DESC, C.CourseID DESC\
+                    LIMIT {N}"
+        querySuccess = self.executeSingleQueryCommand(query, commit=False)
+        if querySuccess:
+            rows = self.dbCursor.fetchall()
+            DbInterface.__outputTable(rows)
+
+    def db_adminEmails(self, machineId: int) -> None:
+        '''
+        Given a machine ID, find all administrators of that machine. List the emails of those administrators. Ordered by netid ascending.
+
+        in -> python3 project.py adminEmails [machineId: int]
+        out -> Table - UCINETId,first name,middle name,last name,list of email
+        '''
+        query = f"SELECT AdministratorUCINetID, FirstName, MiddleName, LastName, GROUP_CONCAT(Email SEPARATOR ';') FROM AdministratorManageMachines AM\
+                    JOIN Users U ON AM.AdministratorUCINetID = U.UCINetID\
+                    JOIN UserEmail UE ON U.UCINetID = UE.UCINetID\
+                    WHERE MachineID = {machineId}\
+                    GROUP BY AdministratorUCINetID\
+                    ORDER BY AdministratorUCINetID ASC"
+        querySuccess = self.executeSingleQueryCommand(query, commit=False)
+        if querySuccess:
+            rows = self.dbCursor.fetchall()
+            DbInterface.__outputTable(rows)
+
+
+
+    #TODO: finish all assignment functions and add project requirements as comments
     def db_activeStudent(self, UCINetID: str, email: str) -> None:
-        #DBInterface.__outputTable()
+        #DbInterface.__outputTable()
         pass
     def db_machineUsage(self, UCINetID: str, email: str) -> None:
-        #DBInterface.__outputTable()
+        #DbInterface.__outputTable()
         pass
     
 
