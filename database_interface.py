@@ -297,9 +297,11 @@ class DbInterface(DbConnectable.Connectable):
         in -> python3 project.py popularCourse [N: int]
         out -> Table - CourseId,title,studentCount
         '''
-        query = f"SELECT C.CourseID, Title, COUNT(StudentUCINetID) AS NumStudents FROM Courses C\
-                    JOIN Projects P ON C.CourseID = P.CourseID\
-                    JOIN StudentUseMachinesInProject SU ON P.ProjectID = SU.ProjectID\
+        query = f"SELECT C.CourseID, Title, COUNT(DISTINCT StudentUCINetID) AS NumStudents FROM Courses C\
+                    JOIN Projects\
+                        USING (CourseID)\
+                    JOIN StudentUseMachinesInProject\
+                        USING (ProjectID)\
                     GROUP BY C.CourseID\
                     ORDER BY NumStudents DESC, C.CourseID DESC\
                     LIMIT {N}"
@@ -363,14 +365,17 @@ class DbInterface(DbConnectable.Connectable):
         '''
 
         query = f"SELECT MachineID, Hostname, IPAddress, COUNT(ProjectID)\
-                    FROM Courses\
-                    JOIN Projects\
-                        USING (CourseID)\
-                    JOIN StudentUseMachinesInProject\
-                        USING (ProjectID)\
+                    FROM (\
+                        SELECT *\
+                        FROM Courses\
+                        JOIN Projects\
+                            USING (CourseID)\
+                        JOIN StudentUseMachinesInProject\
+                            USING (ProjectID)\
+                        WHERE Courses.CourseID = {courseId}\
+                    ) AS CoursesUseProjects\
                     RIGHT JOIN Machines\
                         USING (MachineID)\
-                    WHERE CourseID = {courseId}\
                     GROUP BY MachineID, Hostname, IPAddress\
                     ORDER BY MachineID DESC"
         querySuccess = self.executeSingleQueryCommand(query, commit=False, debug=True)
