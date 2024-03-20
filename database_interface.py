@@ -49,7 +49,10 @@ class DbInterface(DbConnectable.Connectable):
         '''
         for row in rawTable:
             outputRow = str(row).strip("[](),")
-            outputRow.replace("'NULL'", "NULL")
+            outputRow = outputRow.replace("'NULL'", "NULL")
+            outputRow = outputRow.replace("'", "")
+            outputRow = outputRow.replace('"', '')
+            outputRow = outputRow.replace(", ", ",")
             print(outputRow)
 
 
