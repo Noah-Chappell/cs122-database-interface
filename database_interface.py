@@ -307,7 +307,8 @@ class DbInterface(DbConnectable.Connectable):
 
     def db_adminEmails(self, machineId: int) -> None:
         '''
-        Given a machine ID, find all administrators of that machine. List the emails of those administrators. Ordered by netid ascending.
+        Given a machine ID, find all administrators of that machine. 
+        List the emails of those administrators. Ordered by netid ascending.
 
         in -> python3 project.py adminEmails [machineId: int]
         out -> Table - UCINETId,first name,middle name,last name,list of email
@@ -323,15 +324,56 @@ class DbInterface(DbConnectable.Connectable):
             rows = self.dbCursor.fetchall()
             DbInterface.__outputTable(rows)
 
+    def db_activeStudent(self, machineId: int, N: int, start: Date, end: Date) -> None:
+        '''
+        Given a machine Id, find all active students that used it more than N 
+        times (including N) in a specific time range (including start and end date). 
+        Ordered by netid ascending. N will be at least 1.
+        
+        in -> python3 project.py activeStudent [machineId: int] [N:int] [start:date] [end:date]
+        out -> Table - UCINETId,first name,middle name,last name
+        '''
+        
+        query = f"SELECT StudentUCINetID, FirstName, MiddleName, LastName\
+                    FROM StudentUseMachinesInProject SU\
+                    JOIN Users U\
+                        ON SU.StudentUCINetID = U.UCINetID\
+                    WHERE MachineID = {machineId} AND StartDate >= '{start}' AND EndDate <= '{end}'\
+                    GROUP BY MachineID, StudentUCINetID, SU.StudentUCINetID, FirstName, MiddleName, LastName\
+                        Having COUNT(*) >= {N}\
+                    ORDER BY StudentUCINetID ASC"
+        querySuccess = self.executeSingleQueryCommand(query, commit=False)
+        if querySuccess:
+            rows = self.dbCursor.fetchall()
+            DbInterface.__outputTable(rows)
 
 
-    #TODO: finish all assignment functions and add project requirements as comments
-    def db_activeStudent(self, UCINetID: str, email: str) -> None:
-        #DbInterface.__outputTable()
-        pass
-    def db_machineUsage(self, UCINetID: str, email: str) -> None:
-        #DbInterface.__outputTable()
-        pass
+    def db_machineUsage(self, courseId: int) -> None:
+        '''
+        Given a course id, count the number of usage of each machine in that course.
+        Each unique record in the MachineUse table counts as one usage. Machines that
+        are not used in the course should have a count of 0 instead of NULL. 
+        Ordered by machineId descending.
+
+        in -> python3 project.py machineUsage [courseId: int]
+        out -> Table - machineID,hostname,ipAddr,count
+        '''
+
+        query = f"SELECT MachineID, Hostname, IPAddress, COUNT(ProjectID)\
+                    FROM Courses\
+                    JOIN Projects\
+                        USING (CourseID)\
+                    JOIN StudentUseMachinesInProject\
+                        USING (ProjectID)\
+                    RIGHT JOIN Machines\
+                        USING (MachineID)\
+                    WHERE CourseID = {courseId}\
+                    GROUP BY MachineID, Hostname, IPAddress\
+                    ORDER BY MachineID DESC"
+        querySuccess = self.executeSingleQueryCommand(query, commit=False, debug=True)
+        if querySuccess:
+            rows = self.dbCursor.fetchall()
+            DbInterface.__outputTable(rows)
     
 
 
