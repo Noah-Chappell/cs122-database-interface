@@ -6,9 +6,9 @@ from database_interface import DbInterface
 
 #TODO: don't use fstring, sql injection attack? womp womp
 DB_CONNECTION_INFO = {
-    'host':'localhost',
-    'user':'root',
-    'password':'root',
+    'host':'test',
+    'user':'password',
+    'password':'cs122a',
     'databaseName':'ics-server-database'
 }
 
